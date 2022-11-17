@@ -37,7 +37,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 		re := regexp.MustCompile(`^(\d+)(s|ms)$`)
 
 		if !re.Match([]byte(delaystr)) {
-			println("error with regex")
+			dropError("the delay must be given in a format like 1s or 1000ms", w)
 			return
 		}
 
