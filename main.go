@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"regexp"
 	"strconv"
 	"time"
+
+	"zxyxy.net/testerpod/utils"
 )
 
 func main() {
@@ -34,24 +35,15 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Query().Has("delay") {
 		delaystr := r.URL.Query().Get("delay")
-		re := regexp.MustCompile(`^(\d+)(s|ms)$`)
 
-		if !re.Match([]byte(delaystr)) {
-			dropError("the delay must be given in a format like 1s or 1000ms", w)
+		delay, err := utils.ParseDuration(delaystr)
+
+		if err != nil {
+			dropError(err.Error(), w)
 			return
 		}
 
-		parts := re.FindStringSubmatch(delaystr)
-		delay, _ := strconv.ParseInt(parts[1], 10, 64)
-
-		var multiplier time.Duration
-		if parts[2] == "s" {
-			multiplier = time.Second
-		} else {
-			multiplier = time.Millisecond
-		}
-
-		time.Sleep(time.Duration(delay) * multiplier)
+		time.Sleep(delay)
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
